@@ -1,0 +1,51 @@
+{
+  "name": "@stage/create-project",
+  "version": "0.0.1",
+  "description": "快速创建vue3项目的命令行工具。",
+  "type": "module",
+  "license": "MIT",
+  "author": "Wenhao.Huang",
+  "bin": {
+    "create-project": "./bin/index.js",
+    "cva": "./bin/index.js"
+  },
+  "files": [
+    "bin",
+    "template-*",
+    "dist"
+  ],
+  "scripts": {
+    "dev": "unbuild --stub",
+    "build": "unbuild",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": "^16.20.0 || >=16.20.0"
+  },
+  "keywords": [
+    "cli",
+    "stage",
+    "vue3",
+    "create"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WenHaoHuang/create-project.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WenHaoHuang/create-project/issues"
+  },
+  "homepage": "https://github.com/WenHaoHuang/create-project#readme",
+  "devDependencies": {
+    "@clack/prompts": "^0.6.3",
+    "@types/minimist": "^1.2.2",
+    "@types/prompts": "^2.4.4",
+    "cross-spawn": "^7.0.3",
+    "kolorist": "^1.8.0",
+    "minimist": "^1.2.8",
+    "picocolors": "^1.0.0",
+    "prompts": "^2.4.2",
+    "unbuild": "^1.2.1"
+  }
+}

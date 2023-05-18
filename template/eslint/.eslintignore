@@ -1,0 +1,9 @@
+node_modules
+/dist
+/scripts
+/template
+libs/
+packages/*/es
+packages/*/lib
+pnpm-lock.yaml
+!.*

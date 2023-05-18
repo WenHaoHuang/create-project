@@ -1,49 +1,80 @@
-// import fs from 'node:fs'
-// import path from 'node:path'
-// import { fileURLToPath } from 'node:url'
+import fs from 'node:fs';
+import path from 'node:path';
 import minimist from 'minimist';
-import { setTimeout as sleep } from 'node:timers/promises';
-import {
-  intro,
-  outro,
-  confirm,
-  select,
-  spinner,
-  isCancel,
-  cancel,
-  text,
-} from '@clack/prompts';
+import prompts from 'prompts';
 import pc from 'picocolors';
+import pkg from '../package.json';
+import { questions } from './questions';
+import { 
+  checkNodeVersion,
+  formatTargetDir,
+  defaultTargetDir,
+  pkgFromUserAgent,
+  getCommand,
+  render,
+} from './utils';
 
-const argv = minimist<{
-  t?: string
-  template?: string
-}>(process.argv.slice(2), { string: ['_'] })
-const cwd = process.cwd()
+const requiredVersion = pkg.engines.node;
+const argv = minimist<{ t?: string; template?: string }>(process.argv.slice(2), { string: ['_'] });
+const cwd = process.cwd();
+const targetDir = formatTargetDir(argv._[0]) || defaultTargetDir;
 
 async function init() {
   console.log();
-  intro(pc.inverse('create-project'));
-  console.log('>>> create project -> init.', cwd, argv);
-  const projectName = await text({
-    message: 'Project name:',
-    placeholder: 'Anonymous',
-  });
-
-  if (isCancel(projectName)) {
-    cancel('Operation cancelled');
-    return process.exit(0);
+  checkNodeVersion(requiredVersion, '@sackcloth/create-project');
+  let result: prompts.Answers<'projectName' | 'overwrite' | 'overwriteChecker' | 'projectDesc' | 'needsEslint' | 'needsPrettier' | 'needsStylelint'>;
+  try {
+    result = await prompts(questions(targetDir), {
+      onCancel: () => {
+        throw new Error(pc.red('✖') + ' Operation cancelled');
+      },
+    });
+  } catch (cancelled: any) {
+    console.log();
+    console.log(cancelled.message);
+    process.exit(1);
   }
-  const s = spinner();
-  s.start('Installing via npm');
+  const {
+    projectName,
+    overwrite,
+    projectDesc,
+    needsEslint,
+    needsPrettier,
+    needsStylelint,
+  } = result;
+  const root = path.join(cwd, projectName);
+  if (fs.existsSync(root) && overwrite) {
+    fs.rmSync(root, { recursive: true, force: true});
+  }
+  fs.mkdirSync(root, { recursive: true });
+  const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent);
+  const pkgManager = pkgInfo ? pkgInfo.name : 'npm';
 
-  await sleep(3000);
+  console.log(`\nScaffolding project in ${root}...`)
+  
+  await render('base', root, { projectName, projectDesc, pkgManager });
 
-  s.stop('Installed via npm');
-  await sleep(1000);
-  outro("You're all set!");
+  if (needsEslint) {
+    await render('eslint', root);
+
+    if (needsPrettier) {
+      await render('prettier', root);
+    }
+  }
+
+  if (needsStylelint) {
+    await render('stylelint', root);
+  }
+  console.log(pc.green(`\nDone. Now run:\n`));
+  console.log(`  ${pc.bold(pc.cyan(`cd ${projectName}`))}`);
+  console.log(`  ${pc.bold(pc.cyan(getCommand(pkgManager, 'install')))}`);
+  if (needsPrettier) {
+    console.log(`  ${pc.bold(pc.cyan(getCommand(pkgManager, 'format')))}`)
+  }
+  console.log(`  ${pc.bold(pc.cyan(getCommand(pkgManager, 'dev')))}`);
+  console.log();
 }
 
 init().catch((e) => {
-  console.error(e)
-})
+  console.error(e);
+});

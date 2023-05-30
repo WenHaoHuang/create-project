@@ -3,10 +3,10 @@
     "lintcss": "stylelint \"src/**/*.scss\" --fix"
   },
   "devDependencies": {
-    "stylelint": "15.6.0",
+    "stylelint": "15.6.2",
     "stylelint-config-recess-order": "4.0.0",
     "stylelint-config-standard": "33.0.0",
     "stylelint-order": "6.0.3",
-    "stylelint-scss": "4.6.0"
+    "stylelint-scss": "5.0.0"
   }
 }

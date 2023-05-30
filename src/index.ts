@@ -68,9 +68,6 @@ async function init() {
   console.log(pc.green(`\nDone. Now run:\n`));
   console.log(`  ${pc.bold(pc.cyan(`cd ${projectName}`))}`);
   console.log(`  ${pc.bold(pc.cyan(getCommand(pkgManager, 'install')))}`);
-  if (needsPrettier) {
-    console.log(`  ${pc.bold(pc.cyan(getCommand(pkgManager, 'format')))}`)
-  }
   console.log(`  ${pc.bold(pc.cyan(getCommand(pkgManager, 'dev')))}`);
   console.log();
 }
